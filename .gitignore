@@ -1,0 +1,10 @@
+ID3/ID3-dataset
+ID3/DecisionTree.py
+ID3/unit_test.py
+MDP/__pycache__
+MDP/board.txt
+MDP/main.py
+MDP/mdp.py
+MDP/terminal_states.txt
+MDP/transition_function.txt
+
