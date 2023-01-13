@@ -12,9 +12,35 @@ def value_iteration(mdp, U_init, epsilon=10 ** (-3)):
     #
 
     # ====== YOUR CODE: ======
-    raise NotImplementedError
+    discount_gamma = mdp.gamma
+    num_rows = mdp.num_row
+    num_cols = mdp.num_col
+    actions = mdp.actions
+    rewards = mdp.board
+    U_tag = np.zeros((num_rows, num_cols))
+
+    while True:
+        U = np.copy(U_tag)
+        delta = 0
+        for row in range(num_rows):
+            for col in range(num_cols):
+                if rewards[row][col] != 'WALL':
+                    temp = [average_utility(mdp, (row, col), action, U) for action in actions.keys()]
+                    U_tag[row][col] = float(rewards[row][col]) + discount_gamma * max(temp)
+                    diff = abs(U_tag[row][col] - U[row][col])
+                    if diff > delta:
+                        delta = diff
+        if delta < epsilon * ((1 - discount_gamma) / discount_gamma):
+            return U
     # ========================
 
+def average_utility(mdp, state, action_to_evaluate, U):
+    probabilities = mdp.transition_function[action_to_evaluate]
+    sum = 0
+    for (action, probability) in zip(mdp.actions.keys(), probabilities):
+        new_state = mdp.step(state, action)
+        sum += probability * U[new_state[0]][new_state[1]]
+    return sum
 
 def get_policy(mdp, U):
     # TODO:
@@ -81,3 +107,4 @@ def policy_iteration(mdp, policy_init):
     # ====== YOUR CODE: ======
     raise NotImplementedError
     # ========================
+
