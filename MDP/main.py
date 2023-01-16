@@ -63,18 +63,18 @@ def example_driver():
     print("\nFinal utility:")
     U_new = value_iteration(mdp, U)
     mdp.print_utility(U_new)
-    #print("\nFinal policy:")
-    #policy = get_policy(mdp, U_new)
-    #mdp.print_policy(policy)
+    print("\nFinal policy:")
+    policy = get_policy(mdp, U_new)
+    mdp.print_policy(policy)
 
 
-    #print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-    #print("@@@@@@@@@@@@ QLearning @@@@@@@@@@@@")
-    #print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print("@@@@@@@@@@@@ QLearning @@@@@@@@@@@@")
+    print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
 
-    #print("\nBest Policy:")
-    #policy = q_table_policy_extraction(mdp, q_learning(mdp, (2, 0)))
-    #mdp.print_policy(policy)
+    print("\nBest Policy:")
+    policy = q_table_policy_extraction(mdp, q_learning(mdp, (2, 0)))
+    mdp.print_policy(policy)
 
     # Bonus
     """
