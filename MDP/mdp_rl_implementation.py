@@ -18,13 +18,14 @@ def value_iteration(mdp, U_init, epsilon=10 ** (-3)):
     actions = mdp.actions
     rewards = mdp.board
 
-    U_tag = np.zeros((num_rows, num_cols))
+    U_tag = np.zeros((num_rows, num_cols)) # TODO: check what to do with U_init
     for row in range(num_rows):
         for col in range(num_cols):
-            if rewards[row][col] != 'WALL':
-                U_tag[row][col] = float(rewards[row][col])
+            if (row, col) in mdp.terminal_states and rewards[row][col] != 'WALL':
+                    U_tag[row][col] = float(rewards[row][col])
 
     while True:
+        #print(U_tag)
         U = np.copy(U_tag)
         delta = 0
         for row in range(num_rows):
@@ -97,16 +98,17 @@ def q_learning(mdp, init_state, total_episodes=10000, max_steps=999, learning_ra
         state = init_state
         for step_i in range(max_steps):
             explore_exploit = random.uniform(0, 1)
-            if explore_exploit > epsilon:
+            if explore_exploit > epsilon:  # exploit
                 action = np.argmax(qtable[state[0]][state[1]])
                 actionstring = actions_string[action]
-            else:
+            else:  # explore
                 actionstring = random.sample(actions_string, 1)
                 actionstring = actionstring[0]
                 action = actions_string.index(actionstring)
             new_state, reward = take_step(mdp, state, actionstring)
             qtable[state[0]][state[1]][action] = ((1 - learning_rate) * qtable[state[0]][state[1]][action]) + \
-                                learning_rate * (reward + (mdp.gamma * np.max(qtable[new_state[0]][new_state[1]])))
+                                                 learning_rate * (reward + (
+                        mdp.gamma * np.max(qtable[new_state[0]][new_state[1]])))
             state = new_state
             if new_state in mdp.terminal_states:
                 break
@@ -130,7 +132,7 @@ def q_table_policy_extraction(mdp, qtable):
     #
 
     # ====== YOUR CODE: ======
-    #supposed to be fine
+    # supposed to be fine
     P = [['UP' for col in range(mdp.num_col)] for row in range(mdp.num_row)]
     actions_string = list(mdp.actions.keys())
     for row in range(mdp.num_row):
