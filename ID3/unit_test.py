@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from KNN import KNNClassifier
+#from KNN import KNNClassifier
 from utils import accuracy, l2_dist
 
 
@@ -30,6 +30,7 @@ class Test(unittest.TestCase):
         print('Success')
 
     def test_accuracy(self):
+        pass
         y1 = np.array([1, 1, 1])  # (N1, D) = (3,)
         y2 = np.array([1, 0, 0])  # (N2, D) = (3,)
 

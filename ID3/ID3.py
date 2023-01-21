@@ -32,7 +32,9 @@ class ID3:
         impurity = 0.0
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        for label, count in counts:
+            p = count / rows.shape[0]
+            impurity -= (p * math.log(p, 2))
         # ========================
 
         return impurity
@@ -56,7 +58,10 @@ class ID3:
 
         info_gain_value = 0.0
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        left_uncertainty = ID3.entropy(left, left_labels)
+        right_uncertainty = ID3.entropy(right, right_labels)
+        info_gain_value = current_uncertainty - ((left_uncertainty / current_uncertainty) * left_uncertainty) - \
+            ((right_uncertainty / current_uncertainty) * right_uncertainty)
         # ========================
 
         return info_gain_value
@@ -79,7 +84,19 @@ class ID3:
         assert len(rows) == len(labels), 'Rows size should be equal to labels size.'
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        true_rows = []
+        true_labels = []
+        false_rows = []
+        false_labels = []
+        for row, label in zip(rows, labels):
+            matches = question.match(row)
+            if matches:
+                true_rows.append(row)
+                true_labels.append(label)
+            else:
+                false_rows.append(row)
+                false_labels.append(label)
+        gain = self.info_gain(false_rows, false_labels, true_rows, true_labels, current_uncertainty)
         # ========================
 
         return gain, true_rows, true_labels, false_rows, false_labels
@@ -101,7 +118,21 @@ class ID3:
         current_uncertainty = self.entropy(rows, labels)
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        for f_idx in range(rows.shape[1]):
+            sorted_by_f = [(sample_idx, row[f_idx]) for sample_idx, row in enumerate(rows)]
+            sorted_by_f.sort(key=(lambda x: x[1]))
+            for i in range(len(sorted_by_f)-1):
+                t_i = (rows[i][f_idx] + rows[i+1][f_idx]) / 2
+                question = Question([row[f_idx] for row in rows], f_idx, t_i)
+                gain, true_rows, true_labels, false_rows, false_labels = self.partition(rows, labels, question,
+                                                                                        current_uncertainty)
+                if gain >= best_gain:
+                    best_question = question
+                    best_false_rows = false_rows
+                    best_false_labels = false_labels
+                    best_true_rows = true_rows
+                    best_true_labels = true_labels
+                    best_gain = gain
         # ========================
 
         return best_gain, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels
@@ -123,7 +154,13 @@ class ID3:
         true_branch, false_branch = None, None
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        if len(set(labels)) == 1 """or len(rows) < self.min_for_pruning""":
+            return Leaf(rows, labels)
+        else:
+            best_gain, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels = \
+                self.find_best_split(rows, labels)
+            true_branch = self.build_tree(best_true_rows, best_true_labels)
+            false_branch = self.build_tree(best_false_rows, best_false_labels)
         # ========================
 
         return DecisionNode(best_question, true_branch, false_branch)
@@ -137,7 +174,8 @@ class ID3:
         # TODO: Build the tree that fits the input data and save the root to self.tree_root
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        # TODO: check if x_train y_train is just rows, label?
+        self.tree_root = self.build_tree(x_train, y_train)
         # ========================
 
     def predict_sample(self, row, node: DecisionNode or Leaf = None):
