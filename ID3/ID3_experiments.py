@@ -59,19 +59,13 @@ def best_m_test(x_train, y_train, x_test, y_test, min_for_pruning):
     acc = None
 
     # ====== YOUR CODE: ======
-    labels = []
-    for label in y_train:
-        if label not in labels:
-            labels.append(label)
+    labels = list(set(y_train))
 
     id3 = ID3(labels, min_for_pruning)
     id3.fit(x_train, y_train)
-    y_pred = id3.Prediction(x_test).predict()
+    y_pred = id3.predict(x_test)
     sum = 0
-    for y in y_test:
-        if y == y_pred:
-            sum += 1
-    acc = sum / len(y_test)
+    acc = accuracy(y_test, y_pred)
     # ========================
 
     return acc

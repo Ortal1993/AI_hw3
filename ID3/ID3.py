@@ -163,14 +163,10 @@ class ID3:
         elif len(rows) <= self.min_for_pruning:
             counts = class_counts(rows, labels)
             if (counts["M"] >= counts["B"]):
-                for label in labels:
-                    if label == "B":
-                        label = "M"
+                labels = np.array(['M' for i in range(len(labels))])
                 return Leaf(rows, labels)
             else:
-                for label in labels:
-                    if label == "M":
-                        label = "B"
+                labels = np.array(['B' for i in range(len(labels))])
                 return Leaf(rows, labels)
         else:
             best_gain, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels = self.find_best_split(
