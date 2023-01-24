@@ -29,7 +29,17 @@ def basic_experiment(x_train, y_train, x_test, y_test, formatted_print=False):
     acc = None
 
     # ====== YOUR CODE: ======
-    raise NotImplementedError
+    labels = []
+    for label in y_train:
+        if label not in labels:
+            labels.append(label)
+
+    id3 = ID3(labels)
+    id3.fit(x_train, y_train)
+    print("hi")
+    y_pred = id3.Prediction(x_test).predict()
+    acc = accuracy(y_test, y_pred)
+    
     # ========================
 
     assert acc > 0.9, 'you should get an accuracy of at least 90% for the full ID3 decision tree'
@@ -44,7 +54,7 @@ def best_m_test(x_train, y_train, x_test, y_test, min_for_pruning):
         :param: best_m: the value of M with the highest mean accuracy across folds
         :return: acc: the accuracy value of ID3 decision tree instance that using the best_m as the pruning parameter.
     """
-
+    
     # TODO:
     #  - Instate ID3 decision tree instance (using pre-training pruning condition).
     #  - Fit the tree on the training data set.
@@ -53,11 +63,22 @@ def best_m_test(x_train, y_train, x_test, y_test, min_for_pruning):
     acc = None
 
     # ====== YOUR CODE: ======
-    raise NotImplementedError
+    labels = []
+    for label in y_train:
+        if label not in labels:
+            labels.append(label)
+
+    id3 = ID3(labels, min_for_pruning)
+    id3.fit(x_train, y_train)
+    y_pred = id3.Prediction(x_test).predict()
+    sum = 0
+    for y in y_test:
+        if y == y_pred:
+            sum += 1
+    acc = sum / len(y_test)
     # ========================
 
     return acc
-
 
 # ========================================================================
 if __name__ == '__main__':
@@ -78,14 +99,15 @@ if __name__ == '__main__':
            uncomment below code and run it
            modify the value from False to True to plot the experiment result
     """
-    plot_graphs = True
-    best_m = cross_validation_experiment(plot_graph=plot_graphs)
-    print(f'best_m = {best_m}')
+    # plot_graphs = True
+    # best_m = cross_validation_experiment(plot_graph=plot_graphs)
+    # print(f'best_m = {best_m}')
 
     """
         pruning experiment, run with the best parameter
         (*) To run the experiment uncomment below code and run it
     """
+    best_m = 50 #for now, we will use the best M value we have got from the cross validation experiment
     acc = best_m_test(*data_split, min_for_pruning=best_m)
     assert acc > 0.95, 'you should get an accuracy of at least 95% for the pruned ID3 decision tree'
     print(f'Test Accuracy: {acc * 100:.2f}%' if formatted_print else acc)

@@ -10,11 +10,11 @@ Make the imports of python packages needed
 
 class ID3:
     def __init__(self, label_names: list, min_for_pruning=0, target_attribute='diagnosis'):
-        self.label_names = label_names
+        self.label_names = label_names#we didnt use it - need to think about it
         self.target_attribute = target_attribute
         self.tree_root = None
-        self.used_features = set()
-        self.min_for_pruning = min_for_pruning
+        self.used_features = set()#TO ASK
+        self.min_for_pruning = min_for_pruning#TO ASK
 
     @staticmethod
     def entropy(rows: np.ndarray, labels: np.ndarray):
@@ -32,7 +32,7 @@ class ID3:
         impurity = 0.0
 
         # ====== YOUR CODE: ======
-        for label, count in counts:
+        for count in counts.values():
             p = count / rows.shape[0]
             impurity -= (p * math.log(p, 2))
         # ========================
@@ -60,8 +60,7 @@ class ID3:
         # ====== YOUR CODE: ======
         left_uncertainty = ID3.entropy(left, left_labels)
         right_uncertainty = ID3.entropy(right, right_labels)
-        info_gain_value = current_uncertainty - ((left_uncertainty / current_uncertainty) * left_uncertainty) - \
-            ((right_uncertainty / current_uncertainty) * right_uncertainty)
+        info_gain_value = current_uncertainty - ((left_uncertainty / current_uncertainty) * left_uncertainty) - ((right_uncertainty / current_uncertainty) * right_uncertainty)
         # ========================
 
         return info_gain_value
@@ -89,14 +88,13 @@ class ID3:
         false_rows = []
         false_labels = []
         for row, label in zip(rows, labels):
-            matches = question.match(row)
-            if matches:
+            if question.match(row):
                 true_rows.append(row)
                 true_labels.append(label)
             else:
                 false_rows.append(row)
                 false_labels.append(label)
-        gain = self.info_gain(false_rows, false_labels, true_rows, true_labels, current_uncertainty)
+        gain = self.info_gain(np.array(false_rows), np.array(false_labels), np.array(true_rows), np.array(true_labels), current_uncertainty)
         # ========================
 
         return gain, true_rows, true_labels, false_rows, false_labels
@@ -127,12 +125,13 @@ class ID3:
                 gain, true_rows, true_labels, false_rows, false_labels = self.partition(rows, labels, question,
                                                                                         current_uncertainty)
                 if gain >= best_gain:
+                    best_gain = gain
+                    best_true_rows = true_rows
+                    best_true_labels = true_labels
                     best_question = question
                     best_false_rows = false_rows
                     best_false_labels = false_labels
-                    best_true_rows = true_rows
-                    best_true_labels = true_labels
-                    best_gain = gain
+                    
         # ========================
 
         return best_gain, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels
@@ -154,17 +153,28 @@ class ID3:
         true_branch, false_branch = None, None
 
         # ====== YOUR CODE: ======
-        if len(set(labels)) == 1 """or len(rows) < self.min_for_pruning""":
+        if len(set(labels)) == 1:
             return Leaf(rows, labels)
+        elif len(rows) <= self.min_for_pruning:
+            counts = class_counts(rows, labels)
+            if(counts["M"] >= counts["B"]):
+                for label in labels:
+                    if label == "B":
+                        label = "M"
+                return Leaf(rows, labels)
+            else:
+                for label in labels:
+                    if label == "M":
+                        label = "B"
+                return Leaf(rows, labels)
         else:
-            best_gain, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels = \
-                self.find_best_split(rows, labels)
+            best_gain, best_question, best_true_rows, best_true_labels, best_false_rows, best_false_labels = self.find_best_split(np.array(rows), np.array(labels))
             true_branch = self.build_tree(best_true_rows, best_true_labels)
             false_branch = self.build_tree(best_false_rows, best_false_labels)
+            
         # ========================
-
         return DecisionNode(best_question, true_branch, false_branch)
-
+        
     def fit(self, x_train, y_train):
         """
         Trains the ID3 model. By building the tree.
@@ -174,10 +184,11 @@ class ID3:
         # TODO: Build the tree that fits the input data and save the root to self.tree_root
 
         # ====== YOUR CODE: ======
-        # TODO: check if x_train y_train is just rows, label?
+        # TODO: check if x_train y_train is just rows, labels?
         self.tree_root = self.build_tree(x_train, y_train)
         # ========================
 
+       
     def predict_sample(self, row, node: DecisionNode or Leaf = None):
         """
         Predict the most likely class for single sample in subtree of the given node.
@@ -191,9 +202,15 @@ class ID3:
         if node is None:
             node = self.tree_root
         prediction = None
-
+        
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        if isinstance(node, Leaf):
+            prediction = node.predictions
+        else:#node is DecisionNode
+            if(node.question.match(row)):
+                prediction = node.true_branch
+            else:
+                prediction = node.false_branch
         # ========================
 
         return prediction
@@ -210,7 +227,17 @@ class ID3:
         y_pred = None
 
         # ====== YOUR CODE: ======
-        raise NotImplementedError
+        for row in rows:
+            y_pred.append(self.predict_sample(row))
         # ========================
 
         return y_pred
+
+    class Prediction:
+        def __init__(self, x_test):
+            self.x_test = x_test
+            self.y_pred = None
+
+        def predict(self):
+            self.y_pred = ID3.predict(self.x_test)
+    
