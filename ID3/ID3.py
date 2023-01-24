@@ -1,5 +1,7 @@
 import math
 
+import numpy as np
+
 from DecisonTree import Leaf, Question, DecisionNode, class_counts
 from utils import *
 
@@ -60,7 +62,7 @@ class ID3:
         # ====== YOUR CODE: ======
         left_uncertainty = ID3.entropy(left, left_labels)
         right_uncertainty = ID3.entropy(right, right_labels)
-        info_gain_value = current_uncertainty - ((left_uncertainty / current_uncertainty) * left_uncertainty) - ((right_uncertainty / current_uncertainty) * right_uncertainty)
+        info_gain_value = current_uncertainty - ((len(left) / (len(left) + len(right))) * left_uncertainty) - ((len(right) / (len(left) + len(right))) * right_uncertainty)
         # ========================
 
         return info_gain_value
@@ -97,7 +99,7 @@ class ID3:
         gain = self.info_gain(np.array(false_rows), np.array(false_labels), np.array(true_rows), np.array(true_labels), current_uncertainty)
         # ========================
 
-        return gain, true_rows, true_labels, false_rows, false_labels
+        return gain, np.array(true_rows), np.array(true_labels), np.array(false_rows), np.array(false_labels)
 
     def find_best_split(self, rows, labels):
         """
@@ -117,10 +119,10 @@ class ID3:
 
         # ====== YOUR CODE: ======
         for f_idx in range(rows.shape[1]):
-            sorted_by_f = [(sample_idx, row[f_idx]) for sample_idx, row in enumerate(rows)]
-            sorted_by_f.sort(key=(lambda x: x[1]))
+            sorted_by_f = [row[f_idx] for row in rows]
+            sorted_by_f.sort()
             for i in range(len(sorted_by_f)-1):
-                t_i = (rows[i][f_idx] + rows[i+1][f_idx]) / 2
+                t_i = (sorted_by_f[i] + sorted_by_f[i+1]) / 2
                 question = Question([row[f_idx] for row in rows], f_idx, t_i)
                 gain, true_rows, true_labels, false_rows, false_labels = self.partition(rows, labels, question,
                                                                                         current_uncertainty)
@@ -153,6 +155,7 @@ class ID3:
         true_branch, false_branch = None, None
 
         # ====== YOUR CODE: ======
+        my_labels = set(labels)
         if len(set(labels)) == 1:
             return Leaf(rows, labels)
         elif len(rows) <= self.min_for_pruning:

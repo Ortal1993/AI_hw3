@@ -29,10 +29,7 @@ def basic_experiment(x_train, y_train, x_test, y_test, formatted_print=False):
     acc = None
 
     # ====== YOUR CODE: ======
-    labels = []
-    for label in y_train:
-        if label not in labels:
-            labels.append(label)
+    labels = list(set(y_train))
 
     id3 = ID3(labels)
     id3.fit(x_train, y_train)
