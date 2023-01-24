@@ -39,7 +39,7 @@ def accuracy(y: np.array, y_pred: np.array):
 
     # ====== YOUR CODE: ======
     num_true = sum(map(lambda x: x[0] == x[1], zip(y, y_pred)))
-    num_examples = y.shape
+    num_examples = y.shape[0]
     accuracy_val = num_true / num_examples
     # ========================
 

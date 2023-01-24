@@ -33,8 +33,7 @@ def basic_experiment(x_train, y_train, x_test, y_test, formatted_print=False):
 
     id3 = ID3(labels)
     id3.fit(x_train, y_train)
-    print("hi")
-    y_pred = id3.Prediction(x_test).predict()
+    y_pred = id3.predict(x_test)
     acc = accuracy(y_test, y_pred)
     
     # ========================
